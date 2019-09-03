@@ -30,13 +30,13 @@ case class Rational(numerator: Int, var denominator: Int) {
 }
 
 object Rational {
-  def apply(numerator: Int, denominator: Int): Rational = new Rational(numerator, denominator)
+//  def apply(numerator: Int, denominator: Int): Rational = new Rational(numerator, denominator)
+//
+//  def apply(numerator: Int): Rational = apply(numerator, 1)
+//
+//  def unapply(arg: Rational): Option[(Int, Int)] = Some(arg.numerator, arg.denominator)
 
-  def apply(numerator: Int): Rational = apply(numerator, 1)
-
-  def unapply(arg: Rational): Option[(Int, Int)] = Some(arg.numerator, arg.denominator)
-
-  implicit def int2Rational(x: Int) : Rational = Rational(x, 1)
+//  implicit def int2Rational(x: Int) : Rational = Rational(x, 1)
 
 }
 
