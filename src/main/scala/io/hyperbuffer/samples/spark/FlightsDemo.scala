@@ -6,28 +6,52 @@ class FlightsDemo {
 
 }
 
-object FlightsDemo extends App {
+object FlightsDemo {
 
-  //  import spark.implicits._
+  private val baseDir = "/home/viktor/projects/samples/spark-demo/data/"
+  private val fileName = "/opt/spark-data/2015-summary.csv"
 
-  val spark = SparkSession
+  private val spark = SparkSession
     .builder()
-    .master("spark://localhost:7077")
+    //    .master("spark://spark-master:7077")
+    .master("local")
     .appName("SparkFlightsDemo")
     .config("spark.cores.max", "1")
+    .config("spark.executor.memory", "512m")
+    //    .config("spark.eventLog.enabled", "false")
+    //    .config("spark.dynamicAllocation.enabled", "true")
+    //    .config("spark.dynamicAllocation.minExecutors", "12")
+    //    .config("spark.dynamicAllocation.executorIdleTimeout", "600")
+    //    .config("spark.shuffle.service.enabled", "true")
+    .config("spark.executor.extraJavaOptions", "-Ddm.logging.level=INFO")
     .getOrCreate()
 
-  spark.conf.set("spark.sql.shuffle.partitions", 5)
-//  spark.conf.set("spark.executor.memory", "1g")
+  def main(args: Array[String]): Unit = {
+    println("**** hello world *****")
+    spark.catalog.listDatabases().show()
+    loadCsv()
+    println("************* job done ***********************")
+    spark.stop()
+  }
 
-  val range = spark.range(0L, 10L).toDF("number")
+  def loadCsv(): Unit = {
+    val flights = spark.read.option("inferSchema", "true")
+      .option("header", "true")
+      //      .csv(fileName)
+      .csv(s"$baseDir/flight-data/csv/2015-summary.csv")
+      .toDF()
 
-  println("**** hello world *****")
+    flights.createOrReplaceTempView("flights_table")
+    val sql = spark.sql(
+      """
+        |SELECT DEST_COUNTRY_NAME, sum(count) as destination_total
+        |FROM flights_table
+        |GROUP BY DEST_COUNTRY_NAME
+        |ORDER BY sum(count) DESC
+        |LIMIT 5
+        |""".stripMargin)
 
-  range.show()
-  println(spark.catalog.listDatabases().show(false))
-
-  //  spark.sparkContext.stop()
-  spark.stop()
-  //  println(range)
+    sql.show()
+    //    println(flights.show())
+  }
 }
