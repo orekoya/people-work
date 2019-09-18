@@ -1,0 +1,19 @@
+version: "3"
+services:
+  filer:
+    image: nginx
+    container_name: filer
+    volumes:
+      - ../src/main/resources/data/csv/:/usr/share/nginx/html/
+    ports:
+      - "28080:80"
+    networks:
+      spark-network:
+        ipv4_address: 172.16.0.20
+networks:
+  spark-network:
+    driver: bridge
+    ipam:
+     driver: default
+     config:
+       - subnet: 172.16.0.0/16
